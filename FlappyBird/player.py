@@ -33,11 +33,35 @@ class Player:
     
     def pipeCollision(self):
         for p in config.pipes:
-            return pygame.Rect.colliderect(self.rect, p.topRect) or \
-                   pygame.Rect.colliderect(self.rect, p.bottomRect)
+            r1 = pygame.Rect.colliderect(self.rect, p.bottomRect)
+
+            if not p.canLandOn and r1 == True:
+                return True
+            
+            self.rect.y -= 5
+
+            r = pygame.Rect.colliderect(self.rect, p.bottomRect)
+            
+            self.rect.y += 5
+
+            if r == False and r1 == True:
+                while pygame.Rect.colliderect(self.rect, p.bottomRect):
+                    self.rect.y -= 1
+                self.vel = 0
+                return False
+            elif r1 == False:
+                return False
+            
+            return True
         
     def update(self, ground):
-        if not (self.groundCollision(ground) or self.pipeCollision()):
+        if self.pipeCollision():
+            self.alive = False
+            self.flap = False
+            self.vel = 0
+            return
+        
+        if not (self.groundCollision(ground)):
             # Gravity
             self.vel += 0.25
             self.rect.y += self.vel
@@ -50,28 +74,43 @@ class Player:
             self.flap = False
             self.vel = 0
 
+        if self.skyCollision():
+            self.alive = False
+
+        if self.groundCollision(ground):
+            self.flap = False
+            self.rect.y = 480
+        else:
+            self.flap = True
+
     def birdFlap(self):
         if not self.flap and not self.skyCollision():
             self.flap = True
-            self.vel = -5
-        if self.vel >= 3:
-            self.flap = False
+            self.vel = -6
+
+    def goUp(self):
+        self.rect.y += 2
+
+    def goDown(self):
+        self.rect.y -= 2
 
     @staticmethod
     def closestPipe():
         for p in config.pipes:
             if not p.passed:
                 return p
+            
+        return None
 
     # AI
 
     def look(self):
-        if config.pipes:
+        if config.pipes and self.closestPipe() != None:
 
             # Line to top pipe
-            self.vision[0] = max(0, self.rect.center[1] - self.closestPipe().topRect.bottom) / 500
+            self.vision[0] = max(0, self.rect.center[1] - 0) / 500
             pygame.draw.line(config.WINDOW, self.color, self.rect.center,
-                             (self.rect.center[0], config.pipes[0].topRect.bottom))
+                             (self.rect.center[0], 0))
 
             # Line to mid pipe
             self.vision[1] = max(0, self.closestPipe().x - self.rect.center[0]) / 500
@@ -85,8 +124,11 @@ class Player:
 
     def think(self):
         self.decision = self.brain.feedForward(self.vision)
-        if self.decision > 0.73:
+        if self.decision > 0.73 and not self.skyCollision():
             self.birdFlap()
+            #self.goUp()
+        #else:
+            #self.goDown()
 
     def calculateFitness(self):
         self.fitness = self.lifespan

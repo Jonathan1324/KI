@@ -22,6 +22,10 @@ class Population:
                 p.draw(config.WINDOW)
                 p.update(config.ground)
 
+    def killAll(self):
+        for p in self.players:
+            p.alive = False
+
     def naturalSelection(self):
         self.speciate()
 

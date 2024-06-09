@@ -16,22 +16,68 @@ class Pipes:
     opening = 100
 
     def __init__(self, winWidth):
+        self.canLandOn = True
         self.x = winWidth
-        self.bottomHeight = random.randint(10, 300)
-        self.topHeight = Ground.groundLevel - self.bottomHeight - self.opening
-        self.bottomRect, self.topRect = pygame.Rect(0, 0, 0, 0), pygame.Rect(0, 0, 0, 0)
+        self.bottomHeight = random.randint(15, 30)
+        self.bottomRect = pygame.Rect(0, 0, 0, 0)
         self.passed = False
         self.offScreen = False
 
     def draw(self, window):
         self.bottomRect = pygame.Rect(self.x, Ground.groundLevel - self.bottomHeight, self.width, self.bottomHeight)
-        self.topRect = pygame.Rect(self.x, 0, self.width, self.topHeight)
 
         pygame.draw.rect(window, (255, 255, 255), self.bottomRect)
-        pygame.draw.rect(window, (255, 255, 255), self.topRect)
 
     def update(self):
-        self.x -= 1
+        self.x -= 2
+        if self.x + Pipes.width <= 50:
+            self.passed = True
+        if self.x <= -self.width:
+            self.offScreen = True
+
+class highPipes:
+    width = 15
+    opening = 100
+
+    def __init__(self, winWidth):
+        self.canLandOn = True
+        self.x = winWidth
+        self.bottomHeight = random.randint(30, 70)
+        self.bottomRect = pygame.Rect(0, 0, 0, 0)
+        self.passed = False
+        self.offScreen = False
+
+    def draw(self, window):
+        self.bottomRect = pygame.Rect(self.x, Ground.groundLevel - self.bottomHeight, self.width, self.bottomHeight)
+
+        pygame.draw.rect(window, (255, 255, 255), self.bottomRect)
+
+    def update(self):
+        self.x -= 2
+        if self.x + Pipes.width <= 50:
+            self.passed = True
+        if self.x <= -self.width:
+            self.offScreen = True
+
+class Spike:
+    width = 15
+    opening = 100
+
+    def __init__(self, winWidth):
+        self.canLandOn = False
+        self.x = winWidth
+        self.bottomHeight = random.randint(10, 20)
+        self.bottomRect = pygame.Rect(0, 0, 0, 0)
+        self.passed = False
+        self.offScreen = False
+
+    def draw(self, window):
+        self.bottomRect = pygame.Rect(self.x, Ground.groundLevel - self.bottomHeight, self.width, self.bottomHeight)
+
+        pygame.draw.rect(window, (255, 0, 0), self.bottomRect)
+
+    def update(self):
+        self.x -= 2
         if self.x + Pipes.width <= 50:
             self.passed = True
         if self.x <= -self.width:

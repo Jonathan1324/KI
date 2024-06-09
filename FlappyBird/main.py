@@ -3,6 +3,7 @@ from sys import exit
 import config
 import components
 import population
+import random
 
 pygame.init()
 
@@ -16,11 +17,46 @@ FONT = pygame.font.Font('freesansbold.ttf', 32)
 TICK_SPEED_OPTIONS = [1, 5, 15, 30, 60, 120, 240, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000]
 SIZES = [1, 10, 100, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000, 2500000, 5000000, 10000000]
 
+generatedPipe = True
+
 def generatePipes():
-    config.pipes.append(components.Pipes(config.WIDTH))
+    global generatedPipe
+
+    if random.randint(0, 15) == 0 and generatedPipe:
+        generatedPipe = False
+        return 0
+    
+    number = random.randint(1, 100)
+    width = 0
+
+    if number <= 50:
+        width = random.randint(10, 50)
+        newPipe = components.Pipes(config.WIDTH)
+        newPipe.width = width
+        config.pipes.append(newPipe)
+        generatedPipe = True
+
+    elif number <= 75:
+        width = random.randint(100, 150)
+        newPipe = components.highPipes(config.WIDTH)
+        newPipe.width = width
+        config.pipes.append(newPipe)
+        generatedPipe = True
+
+    elif number <= 100:
+        width = random.randint(20, 30)
+        newPipe = components.Spike(config.WIDTH)
+        newPipe.width = width
+        config.pipes.append(newPipe)
+        generatedPipe = True
+
+    return width
 
 def main():
-    pipesSpawnTime = 10
+    global floorExtra
+    global extraEnd
+
+    pipesSpawnTime = 5
     tickSpeedKey = 4
     sizeKey = 2
 
@@ -47,6 +83,9 @@ def main():
                     sizeKey += 1
                     if sizeKey >= len(SIZES):
                         sizeKey = len(SIZES) - 1
+                
+                if event.key == pygame.K_r:
+                    population.killAll()
 
         config.WINDOW.fill((0, 0, 0))
 
@@ -55,8 +94,7 @@ def main():
 
         # Spawn Pipes
         if pipesSpawnTime <= 0:
-            generatePipes()
-            pipesSpawnTime = 200
+            pipesSpawnTime = generatePipes() + 200
         pipesSpawnTime -= 1
 
         for p in config.pipes:

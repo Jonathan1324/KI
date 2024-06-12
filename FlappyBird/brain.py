@@ -15,19 +15,15 @@ class Brain:
             for i in range(0, self.inputs):
                 self.nodes.append(node.Node(i))
                 self.nodes[i].layer = 0
-            
-            # Create bias node
-            self.nodes.append(node.Node(3))
-            self.nodes[3].layer = 0
 
             # Create output node
-            self.nodes.append(node.Node(4))
-            self.nodes[4].layer = 1
+            self.nodes.append(node.Node(inputs))
+            self.nodes[inputs].layer = 1
 
             # Create connections
-            for i in range(0, 4):
+            for i in range(0, inputs):
                 self.connections.append(connection.Connection(self.nodes[i],
-                                                            self.nodes[4],
+                                                            self.nodes[inputs],
                                                             random.uniform(-1, 1)))
             
     def connectNodes(self):

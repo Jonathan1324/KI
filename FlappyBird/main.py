@@ -3,6 +3,7 @@ from sys import exit
 import config
 import components
 import population
+import player
 import random
 
 pygame.init()
@@ -19,7 +20,7 @@ SIZES = [1, 10, 100, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000,
 
 generatedPipe = True
 
-def generatePipes():
+def generatePipes(red):
     global generatedPipe
 
     if random.randint(0, 15) == 0 and generatedPipe:
@@ -27,6 +28,7 @@ def generatePipes():
         return 0
     
     number = random.randint(1, 100)
+    
     width = 0
 
     if number <= 50:
@@ -43,7 +45,7 @@ def generatePipes():
         config.pipes.append(newPipe)
         generatedPipe = True
 
-    elif number <= 100:
+    elif number <= 100 and red:
         width = random.randint(20, 30)
         newPipe = components.Spike(config.WIDTH)
         newPipe.width = width
@@ -59,6 +61,13 @@ def main():
     pipesSpawnTime = 5
     tickSpeedKey = 4
     sizeKey = 2
+
+    controlPlayer = player.Player()
+    controlPlayer.ai = False
+    controlPlayer.x = 75
+    controlPlayer.rect = pygame.Rect(controlPlayer.x, controlPlayer.y, 20, 20)
+
+    mouseDown = False
 
     while True:
         population.size = SIZES[sizeKey]
@@ -87,6 +96,15 @@ def main():
                 if event.key == pygame.K_r:
                     population.killAll()
 
+            elif event.type == 1025:
+                mouseDown = True
+            elif event.type == 1026:
+                mouseDown = False
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] or mouseDown:
+                controlPlayer.birdFlap()
+
         config.WINDOW.fill((0, 0, 0))
 
         # Draw Ground
@@ -94,7 +112,10 @@ def main():
 
         # Spawn Pipes
         if pipesSpawnTime <= 0:
-            pipesSpawnTime = generatePipes() + 200
+            if random.randint(0, 10) < 5:
+                pipesSpawnTime = generatePipes(False) + random.randint(10, 50)
+            else:
+                pipesSpawnTime = generatePipes(True) + random.randint(100, 200)
         pipesSpawnTime -= 1
 
         for p in config.pipes:
@@ -104,11 +125,16 @@ def main():
                 config.pipes.remove(p)
 
         # Draw Player
-        if not population.extinct():
+        if not population.extinct() or controlPlayer.alive:
             population.updateLivePlayers()
         else:
             config.pipes.clear()
             population.naturalSelection()
+            controlPlayer.alive = True
+
+        if controlPlayer.alive:
+                controlPlayer.draw(config.WINDOW)
+                controlPlayer.update(config.ground)
 
         # Show Text
         text = FONT.render('Generation: ' + str(population.generation), True, (255, 255, 255))

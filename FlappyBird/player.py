@@ -6,6 +6,7 @@ import brain
 class Player:
     def __init__(self):
         # Bird
+        self.ai = True
         self.x, self.y = 50, 200
         self.rect = pygame.Rect(self.x, self.y, 20, 20)
         self.color = random.randint(100, 255), random.randint(100, 255), random.randint(100, 255)
@@ -16,9 +17,9 @@ class Player:
 
         # AI
         self.decision = None
-        self.vision = [0.5, 1, 0.5]
+        self.vision = [0.5, 1, 0.5, 0]
         self.fitness = 0
-        self.inputs = 3
+        self.inputs = 4
         self.brain = brain.Brain(self.inputs)
         self.brain.generateNet()
 
@@ -82,6 +83,7 @@ class Player:
             self.rect.y = 480
         else:
             self.flap = True
+            
 
     def birdFlap(self):
         if not self.flap and not self.skyCollision():
@@ -121,6 +123,8 @@ class Player:
             self.vision[2] = max(0, self.closestPipe().bottomRect.top - self.rect.center[1]) / 500
             pygame.draw.line(config.WINDOW, self.color, self.rect.center,
                              (self.rect.center[0], config.pipes[0].bottomRect.top))
+            
+            self.vision[3] = 0.1
 
     def think(self):
         self.decision = self.brain.feedForward(self.vision)

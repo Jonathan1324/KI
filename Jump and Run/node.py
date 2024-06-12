@@ -10,11 +10,15 @@ class Node:
         self.connections = []
 
     def activate(self):
+        def nTanh(x):
+            tanh = (math.exp(x) - math.exp(-x)) / (math.exp(x) + math.exp(-x))
+            return (tanh + 1)/2
+
         def sigmoid(x):
             return 1/(1+math.exp(-x))
         
         if self.layer == 1:
-            self.outputValue = sigmoid(self.inputValue)
+            self.outputValue = nTanh(self.inputValue)
 
         for i in range(0, len(self.connections)):
             self.connections[i].toNode.inputValue += \
